@@ -1,0 +1,10 @@
+{
+  "parsers": [
+    "./bool/index.js",
+    "./date/index.js",
+    "./float/index.js",
+    "./int/index.js",
+    "./string/index.js",
+    "./default/index.js"
+  ]
+}

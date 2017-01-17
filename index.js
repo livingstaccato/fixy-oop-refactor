@@ -4,7 +4,7 @@ var moment = require("moment");
 var Papa = require("papaparse");
 var lodash = require("lodash");
 
-var FixyParser = require("./lib/FixyParser");
+var ParserManager = require("./lib/ParserManager");
 
 
 String.prototype.splice = function(idx, rem, str) {
@@ -12,66 +12,15 @@ String.prototype.splice = function(idx, rem, str) {
 };
 
 var parseCol = function(row, map, format){
-	var parser = new FixyParser({blah: "boo"});
+	var parser = new ParserManager();
 
 	var r = {};
 	lodash.forEach(map, function(i){
 		var v = row.substring(i.start-1, (i.start + i.width - 1)).trim();
 		if(v){
+			if (format) { i.format = format; }
 			parser.setOptions(i);
 			r[i.name] = parser.parse(v);
-
-			switch(i.type){
-				case "date":
-					if(i.inputformat){
-						if(moment(v, i.inputformat).isValid()){
-							r[i.name] = moment(v, i.inputformat).format(i.outputformat);	
-						}
-						else{
-							r[i.name] = null;
-						}
-					}
-					else{
-						if(moment(v).isValid()){
-							r[i.name] = moment(v).format(i.outputformat);
-						}
-						else{
-							r[i.name] = null;
-						}
-					}
-					break;
-				case "float":
-					var percision = 2;
-					if(i.percision){
-						percision = i.percision;
-					}
-					var symbol = "";
-					if(i.symbol && format === "csv"){
-						symbol = i.symbol;
-					}
-
-					if(lodash.includes(v, ".")){
-						r[i.name] = symbol + parseFloat(v).toFixed(percision);
-					}
-					else{
-						r[i.name] = symbol + parseFloat(v.splice(i.width - percision, 0, ".")).toFixed(percision);
-					}
-					break;
-				case "int":
-					r[i.name] = parseInt(v);
-					break;
-				case "bool":
-					r[i.name] = false;
-					if(v === i.tVal){
-						r[i.name] = true;
-					}
-					break;
-				case "string":
-					r[i.name] = v;
-					break;
-				default:
-					r[i.name] = v;
-			}
 		}
 		else{
 			r[i.name] = null;
