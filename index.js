@@ -4,15 +4,23 @@ var moment = require("moment");
 var Papa = require("papaparse");
 var lodash = require("lodash");
 
+var FixyParser = require("./lib/FixyParser");
+
+
 String.prototype.splice = function(idx, rem, str) {
     return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
 };
 
 var parseCol = function(row, map, format){
+	var parser = new FixyParser({blah: "boo"});
+
 	var r = {};
 	lodash.forEach(map, function(i){
 		var v = row.substring(i.start-1, (i.start + i.width - 1)).trim();
 		if(v){
+			parser.setOptions(i);
+			r[i.name] = parser.parse(v);
+
 			switch(i.type){
 				case "date":
 					if(i.inputformat){
